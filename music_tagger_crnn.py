@@ -23,7 +23,7 @@ from keras.utils.layer_utils import convert_all_kernels_in_model
 
 TH_WEIGHTS_PATH = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.3/music_tagger_crnn_weights_tf_kernels_th_dim_ordering.h5'
 TF_WEIGHTS_PATH = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.3/music_tagger_crnn_weights_tf_kernels_tf_dim_ordering.h5'
-target = r'E:\NN_Music\testing\026_wrong_validate'
+target = r'E:\NN_Music\testing'
 
 
 #if __name__ == '__main__':
@@ -41,8 +41,6 @@ target = r'E:\NN_Music\testing\026_wrong_validate'
 #    thefile.close()
 
 
-
-
 def getFeturesAndLabelsFromTarget(targetFolder):
     wavFiles = WTI.GetListOfFilesByExt(targetFolder, extention = '.wav')
     upperFolder = WTI.getUpperFolders(wavFiles)
@@ -57,7 +55,22 @@ def getFeturesAndLabelsFromTarget(targetFolder):
             batch_labels[i] = 0
         return batch_features, batch_labels
     else:
-        return None    
+        s = set(upperFolder)
+        theList = list(s)
+        batch_features = np.zeros((n, 96, 1366, 1))
+        batch_labels = np.zeros((n,1),dtype=np.int8)    
+        for i in range(0,n):
+            batch_features[i] = preprocess_input(wavFiles[i])
+            if(theList[0] in wavFiles[i]):
+                #0 = jazz
+                batch_labels[i] = 0
+            if(theList[1] in wavFiles[i]):
+                #1 = rock
+                batch_labels[i] = 1
+            if(theList[2] in wavFiles[i]):
+                #2 = electronic
+                batch_labels[i] = 2
+        return batch_features, batch_labels
 
 #generator for features
 def MelGenerator(features, labels, batch_size):
@@ -135,7 +148,7 @@ def getModel(input_tensor=None):
     x = GRU(32, return_sequences=True, name='gru1')(x)
     x = GRU(32, return_sequences=False, name='gru2')(x)
 
-    x = Dense(1, activation='sigmoid', name='output')(x)
+    x = Dense(3, activation='sigmoid', name='output')(x)
 
     # Create model
     model = Model(melgram_input, x)
@@ -258,30 +271,30 @@ def MusicTaggerCRNN(weights='msd', input_tensor=None,
         return model
 
 #working good
-#if __name__ == '__main__':
-#    batch_features, batch_labels = getFeturesAndLabelsFromTarget(target)
-#    model = getModel()
-#    my_generator = MelGenerator(features = batch_features, labels = batch_labels, batch_size =  12)
-#    model.compile(loss='binary_crossentropy',
-#                optimizer='rmsprop',
-#                metrics=['accuracy'])
-#    model.fit_generator(my_generator, samples_per_epoch = 3, nb_epoch = 2, verbose=2,  callbacks=None, validation_data=None, class_weight=None, nb_worker=1)
-#    model.save_weights('test012.h5')
-#    print("done")
+if __name__ == '__main__':
+    batch_features, batch_labels = getFeturesAndLabelsFromTarget(target)
+    model = getModel()
+    my_generator = MelGenerator(features = batch_features, labels = batch_labels, batch_size =  12)
+    model.compile(loss='categorical_crossentropy',
+                optimizer='rmsprop',
+                metrics=['accuracy'])
+    model.fit_generator(my_generator, samples_per_epoch = 10, nb_epoch = 10, verbose=2,  callbacks=None, validation_data=None, class_weight=None, nb_worker=1)
+    model.save_weights('test012.h5')
+    print("done")
 
 
 #testing binary model
-if __name__ == '__main__':
-     model = getModel()
-     model.load_weights(r'E:\NN_Music\test012.h5')
-     files = WTI.GetListOfFilesByExt(target, extention = '.wav')
-     thefile = open('top1.txt', 'w')
-     for item in files:
-#        #audio_path = r'E:\NN_Music\Good_Model_Music\metal031040.mp3'
-         melgram = preprocess_input(item)
-         melgrams = np.expand_dims(melgram, axis=0)
-         preds = model.predict(melgrams)
+#if __name__ == '__main__':
+#     model = getModel()
+#     model.load_weights(r'E:\NN_Music\test012.h5')
+#     files = WTI.GetListOfFilesByExt(target, extention = '.wav')
+#     thefile = open('top1.txt', 'w')
+#     for item in files:
+
+#         melgram = preprocess_input(item)
+#         melgrams = np.expand_dims(melgram, axis=0)
+#         preds = model.predict(melgrams)
 #        #print(decode_predictions(preds,top_n=2))
-         thefile.write("%s\n" % item)
-         thefile.write("%s\n" % preds)
-     thefile.close()
+#         thefile.write("%s\n" % item)
+#         thefile.write("%s\n" % preds)
+#     thefile.close()

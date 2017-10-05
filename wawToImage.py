@@ -249,7 +249,7 @@ targetValidationPath = r"E:\NN_Music\fma_small\Ready for training"
 trainPath = r'E:\NN_Music\fma_small\Ready for training\train'
 testPath = r'E:\NN_Music\fma_small\Ready for training\test'
 
-tmpTarget = r'E:\NN_Music\testing\026_wrong_validate'
+tmpTarget = r'E:\NN_Music\testing'
 #ConvertToWavFiles(tmpTarget)
 
 
