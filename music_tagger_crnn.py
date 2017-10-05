@@ -270,7 +270,7 @@ def MusicTaggerCRNN(weights='msd', input_tensor=None,
             convert_all_kernels_in_model(model)
         return model
 
-#working good
+
 if __name__ == '__main__':
     batch_features, batch_labels = getFeturesAndLabelsFromTarget(target)
     model = getModel()
