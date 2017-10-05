@@ -1,0 +1,7 @@
+1. sort dataset by available tags.
+2. convert .mp3 to .wav
+3. evaluate soted data and check accuracy.
+if good:
+	prepare for training (save to images and test)
+else 
+	pass
